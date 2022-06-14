@@ -7,36 +7,46 @@ using SQLite;
 
 namespace Lista_Mercado.Helper
 {
+
+     
     public class SQLiteHelper
     {
-        readonly SQLiteAsyncConnection connection;
+        static SQLiteHelper database;
+        readonly SQLiteAsyncConnection _conn;
 
-        public void insert(Produto p)
+        public SQLiteHelper(string path)
         {
-
+            _conn = new SQLiteAsyncConnection(path);
+            _conn.CreateTableAsync<Produto>().Wait();
+        }
+        public Task<int> Insert(Produto p)
+        {
+            return _conn.InsertAsync(p);
         }
 
-        public void update(Produto p)
+        public void Update(Produto p)
         {
+            string sql = "UPDATE Produto SET Descricao=? Quantidade=? Preco=? WHERE id= ?";
+            _conn.QueryAsync<Produto>(sql, p.Descricao, p.Quantidade, p.Preco, p.Id ).Wait();
 
         }
 
 
         //retorna preenchido
-        public Task<Produto> getById(int p)
-        {
-            return new Produto(); 
-        }
+        //public Task<Produto> GetById(int id)
+        //{
+        //    //return new Produto(); 
+        //}
 
         
-        public Task<List<Produto>> getAll()
+        public Task<List<Produto>> GetAll()
         {
-
+            return _conn.Table<Produto>().ToListAsync();
         }
 
-        public void delete(int id)
+        public void Delete(int id)
         {
-
+            _conn.Table<Produto>().DeleteAsync(i => i.Id == id);
         }
     }
 }
